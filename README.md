@@ -1,4 +1,4 @@
-<img width="640" height="448" alt="image" src="https://github.com/user-attachments/assets/6dcad839-8449-410c-81bd-8622f1196ca4" />
+<img width="640" height="448" alt="image" src="https://github.com/user-attachments/assets/80ab67bc-7556-4f12-b106-8d92d7664560" />
 
 > [!NOTE]
 > This repository is a fork of my ASM68K implementation with Mega PCM 2, which this one uses AS and Clone Driver for easier use.
