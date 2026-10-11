@@ -450,7 +450,8 @@ SoundTest_DrawDACSlot:
 		btst	#7,SMPS_Track.PlaybackControl(a0)
 		beq.w	.dac_inactive
 
-		; SavedDAC contains the active MegaPCM sample ID ($81-$E0).
+		; SavedDAC contains the compact runtime ID assigned by dcSample.
+		; It matches the .id value used by SMPS2ASM (for example, dKick=dac81.id).
 		; $80 is the Clone Driver's no-sample/rest marker.
 		moveq	#0,d4
 		move.b	SMPS_Track.SavedDAC(a0),d4
@@ -697,9 +698,11 @@ SoundTest_FormatNoiseFrequency:
 SoundTest_LookupDACSample:
 		moveq	#0,d0
 		move.b	d4,d0
-		cmpi.w	#SoundTest_DACSample_First,d0
+		; dcSample starts at $81 and compacts IDs when optional sets are disabled.
+		; dacE0.id is the actual last ID (same value as SMPS2ASM dSega).
+		cmpi.w	#$81,d0
 		blo.s	.dac_unknown
-		cmpi.w	#SoundTest_DACSample_Last,d0
+		cmpi.w	#dacE0.id,d0
 		bhi.s	.dac_unknown
 
 		lea	SoundTest_DACSampleTable(pc),a1
@@ -935,10 +938,11 @@ SoundTest_NoteLetters:  dc.b "C-C#D-D#E-F-F#G-G#A-A#B-"
 		even
 
 ; ---------------------------------------------------------------------------
-; MegaPCM DAC sample index. IDs, rate values and compile guards mirror
-; the uploaded "MegaPCM - DAC Table.asm" source exactly.
+; MegaPCM DAC sample index. The ID byte MUST use each dcSample label's .id.
+; These values are identical to the IDs used by the SMPS2ASM equates
+; (for example, dKick = dac81.id). dcSample compacts IDs as optional sample
+; sets are enabled; the source suffix ($81/$82/etc.) is NOT always the runtime ID.
 ; Record format (8 bytes): ID.b, reserved.b, rate.w, display-name pointer.l.
-; Disabled sample-set IDs are absent and resolve to UNUSED at runtime.
 ; ---------------------------------------------------------------------------
 SoundTest_DACSampleEntry: macro sampleID,sampleRate,sampleName
 	dc.b	sampleID,0
@@ -948,115 +952,115 @@ SoundTest_DACSampleEntry: macro sampleID,sampleRate,sampleName
 
 SoundTest_DACSampleTable:
 	if SMPS_S1DACSamples||SMPS_S2DACSamples
-		SoundTest_DACSampleEntry $81,8201,SoundTest_DAC_81
-		SoundTest_DACSampleEntry $82,23784,SoundTest_DAC_82
-		SoundTest_DACSampleEntry $85,7328,SoundTest_DAC_85
-		SoundTest_DACSampleEntry $88,9635,SoundTest_DAC_88
-		SoundTest_DACSampleEntry $89,8720,SoundTest_DAC_89
-		SoundTest_DACSampleEntry $8A,7138,SoundTest_DAC_8A
-		SoundTest_DACSampleEntry $8B,6957,SoundTest_DAC_8B
+		SoundTest_DACSampleEntry dac81.id,8201,SoundTest_DAC_81
+		SoundTest_DACSampleEntry dac82.id,23784,SoundTest_DAC_82
+		SoundTest_DACSampleEntry dac85.id,7328,SoundTest_DAC_85
+		SoundTest_DACSampleEntry dac88.id,9635,SoundTest_DAC_88
+		SoundTest_DACSampleEntry dac89.id,8720,SoundTest_DAC_89
+		SoundTest_DACSampleEntry dac8A.id,7138,SoundTest_DAC_8A
+		SoundTest_DACSampleEntry dac8B.id,6957,SoundTest_DAC_8B
 	endif
 	if SMPS_S2DACSamples
-		SoundTest_DACSampleEntry $83,17127,SoundTest_DAC_83
-		SoundTest_DACSampleEntry $84,15232,SoundTest_DAC_84
-		SoundTest_DACSampleEntry $86,13714,SoundTest_DAC_86
-		SoundTest_DACSampleEntry $87,7426,SoundTest_DAC_87
-		SoundTest_DACSampleEntry $8C,22799,SoundTest_DAC_8C
-		SoundTest_DACSampleEntry $8D,18262,SoundTest_DAC_8D
-		SoundTest_DACSampleEntry $8E,15232,SoundTest_DAC_8E
-		SoundTest_DACSampleEntry $8F,15232,SoundTest_DAC_8F
-		SoundTest_DACSampleEntry $90,13064,SoundTest_DAC_90
-		SoundTest_DACSampleEntry $91,9806,SoundTest_DAC_91
+		SoundTest_DACSampleEntry dac83.id,17127,SoundTest_DAC_83
+		SoundTest_DACSampleEntry dac84.id,15232,SoundTest_DAC_84
+		SoundTest_DACSampleEntry dac86.id,13714,SoundTest_DAC_86
+		SoundTest_DACSampleEntry dac87.id,7426,SoundTest_DAC_87
+		SoundTest_DACSampleEntry dac8C.id,22799,SoundTest_DAC_8C
+		SoundTest_DACSampleEntry dac8D.id,18262,SoundTest_DAC_8D
+		SoundTest_DACSampleEntry dac8E.id,15232,SoundTest_DAC_8E
+		SoundTest_DACSampleEntry dac8F.id,15232,SoundTest_DAC_8F
+		SoundTest_DACSampleEntry dac90.id,13064,SoundTest_DAC_90
+		SoundTest_DACSampleEntry dac91.id,9806,SoundTest_DAC_91
 	endif
 	if SMPS_S3DACSamples||SMPS_SKDACSamples||SMPS_S3DDACSamples
-		SoundTest_DACSampleEntry $92,19090,SoundTest_DAC_92
-		SoundTest_DACSampleEntry $93,11274,SoundTest_DAC_93
-		SoundTest_DACSampleEntry $94,9050,SoundTest_DAC_94
-		SoundTest_DACSampleEntry $95,7599,SoundTest_DAC_95
-		SoundTest_DACSampleEntry $96,6490,SoundTest_DAC_96
-		SoundTest_DACSampleEntry $97,19090,SoundTest_DAC_97
-		SoundTest_DACSampleEntry $98,19090,SoundTest_DAC_98
-		SoundTest_DACSampleEntry $99,16766,SoundTest_DAC_99
-		SoundTest_DACSampleEntry $9A,13482,SoundTest_DAC_9A
-		SoundTest_DACSampleEntry $9B,9050,SoundTest_DAC_9B
-		SoundTest_DACSampleEntry $9C,7357,SoundTest_DAC_9C
-		SoundTest_DACSampleEntry $9D,14945,SoundTest_DAC_9D
-		SoundTest_DACSampleEntry $9E,12852,SoundTest_DAC_9E
-		SoundTest_DACSampleEntry $9F,10040,SoundTest_DAC_9F
-		SoundTest_DACSampleEntry $A0,14945,SoundTest_DAC_A0
-		SoundTest_DACSampleEntry $A1,20513,SoundTest_DAC_A1
-		SoundTest_DACSampleEntry $A2,15803,SoundTest_DAC_A2
-		SoundTest_DACSampleEntry $A3,13482,SoundTest_DAC_A3
-		SoundTest_DACSampleEntry $A4,11274,SoundTest_DAC_A4
-		SoundTest_DACSampleEntry $A5,16766,SoundTest_DAC_A5
-		SoundTest_DACSampleEntry $A6,13482,SoundTest_DAC_A6
-		SoundTest_DACSampleEntry $A7,11755,SoundTest_DAC_A7
-		SoundTest_DACSampleEntry $A8,9687,SoundTest_DAC_A8
-		SoundTest_DACSampleEntry $A9,12852,SoundTest_DAC_A9
-		SoundTest_DACSampleEntry $AA,9358,SoundTest_DAC_AA
-		SoundTest_DACSampleEntry $AB,8492,SoundTest_DAC_AB
-		SoundTest_DACSampleEntry $AC,12279,SoundTest_DAC_AC
-		SoundTest_DACSampleEntry $AD,13482,SoundTest_DAC_AD
-		SoundTest_DACSampleEntry $AE,7998,SoundTest_DAC_AE
-		SoundTest_DACSampleEntry $AF,7998,SoundTest_DAC_AF
+		SoundTest_DACSampleEntry dac92.id,19090,SoundTest_DAC_92
+		SoundTest_DACSampleEntry dac93.id,11274,SoundTest_DAC_93
+		SoundTest_DACSampleEntry dac94.id,9050,SoundTest_DAC_94
+		SoundTest_DACSampleEntry dac95.id,7599,SoundTest_DAC_95
+		SoundTest_DACSampleEntry dac96.id,6490,SoundTest_DAC_96
+		SoundTest_DACSampleEntry dac97.id,19090,SoundTest_DAC_97
+		SoundTest_DACSampleEntry dac98.id,19090,SoundTest_DAC_98
+		SoundTest_DACSampleEntry dac99.id,16766,SoundTest_DAC_99
+		SoundTest_DACSampleEntry dac9A.id,13482,SoundTest_DAC_9A
+		SoundTest_DACSampleEntry dac9B.id,9050,SoundTest_DAC_9B
+		SoundTest_DACSampleEntry dac9C.id,7357,SoundTest_DAC_9C
+		SoundTest_DACSampleEntry dac9D.id,14945,SoundTest_DAC_9D
+		SoundTest_DACSampleEntry dac9E.id,12852,SoundTest_DAC_9E
+		SoundTest_DACSampleEntry dac9F.id,10040,SoundTest_DAC_9F
+		SoundTest_DACSampleEntry dacA0.id,14945,SoundTest_DAC_A0
+		SoundTest_DACSampleEntry dacA1.id,20513,SoundTest_DAC_A1
+		SoundTest_DACSampleEntry dacA2.id,15803,SoundTest_DAC_A2
+		SoundTest_DACSampleEntry dacA3.id,13482,SoundTest_DAC_A3
+		SoundTest_DACSampleEntry dacA4.id,11274,SoundTest_DAC_A4
+		SoundTest_DACSampleEntry dacA5.id,16766,SoundTest_DAC_A5
+		SoundTest_DACSampleEntry dacA6.id,13482,SoundTest_DAC_A6
+		SoundTest_DACSampleEntry dacA7.id,11755,SoundTest_DAC_A7
+		SoundTest_DACSampleEntry dacA8.id,9687,SoundTest_DAC_A8
+		SoundTest_DACSampleEntry dacA9.id,12852,SoundTest_DAC_A9
+		SoundTest_DACSampleEntry dacAA.id,9358,SoundTest_DAC_AA
+		SoundTest_DACSampleEntry dacAB.id,8492,SoundTest_DAC_AB
+		SoundTest_DACSampleEntry dacAC.id,12279,SoundTest_DAC_AC
+		SoundTest_DACSampleEntry dacAD.id,13482,SoundTest_DAC_AD
+		SoundTest_DACSampleEntry dacAE.id,7998,SoundTest_DAC_AE
+		SoundTest_DACSampleEntry dacAF.id,7998,SoundTest_DAC_AF
 	endif
 	if SMPS_S3DACSamples||SMPS_SKDACSamples
-		SoundTest_DACSampleEntry $B0,12279,SoundTest_DAC_B0
-		SoundTest_DACSampleEntry $B1,12279,SoundTest_DAC_B1
-		SoundTest_DACSampleEntry $B2,13482,SoundTest_DAC_B2
-		SoundTest_DACSampleEntry $B3,13482,SoundTest_DAC_B3
-		SoundTest_DACSampleEntry $B4,7998,SoundTest_DAC_B4
-		SoundTest_DACSampleEntry $B5,7998,SoundTest_DAC_B5
-		SoundTest_DACSampleEntry $B6,12279,SoundTest_DAC_B6
-		SoundTest_DACSampleEntry $B7,14176,SoundTest_DAC_B7
-		SoundTest_DACSampleEntry $B8,7998,SoundTest_DAC_B8
-		SoundTest_DACSampleEntry $B9,7998,SoundTest_DAC_B9
-		SoundTest_DACSampleEntry $BA,12279,SoundTest_DAC_BA
-		SoundTest_DACSampleEntry $BB,13482,SoundTest_DAC_BB
-		SoundTest_DACSampleEntry $BC,11755,SoundTest_DAC_BC
-		SoundTest_DACSampleEntry $BD,16766,SoundTest_DAC_BD
-		SoundTest_DACSampleEntry $BE,10420,SoundTest_DAC_BE
-		SoundTest_DACSampleEntry $BF,7998,SoundTest_DAC_BF
-		SoundTest_DACSampleEntry $C0,14176,SoundTest_DAC_C0
-		SoundTest_DACSampleEntry $C1,9687,SoundTest_DAC_C1
-		SoundTest_DACSampleEntry $C2,7998,SoundTest_DAC_C2
-		SoundTest_DACSampleEntry $C3,8492,SoundTest_DAC_C3
-		SoundTest_DACSampleEntry $C4,6520,SoundTest_DAC_C4
-		SoundTest_DACSampleEntry $C5,12279,SoundTest_DAC_C5
-		SoundTest_DACSampleEntry $C6,12279,SoundTest_DAC_C6
-		SoundTest_DACSampleEntry $C7,12279,SoundTest_DAC_C7
-		SoundTest_DACSampleEntry $C8,7998,SoundTest_DAC_C8
-		SoundTest_DACSampleEntry $C9,12279,SoundTest_DAC_C9
-		SoundTest_DACSampleEntry $CA,7998,SoundTest_DAC_CA
-		SoundTest_DACSampleEntry $CB,7998,SoundTest_DAC_CB
-		SoundTest_DACSampleEntry $CC,7998,SoundTest_DAC_CC
-		SoundTest_DACSampleEntry $CD,12279,SoundTest_DAC_CD
-		SoundTest_DACSampleEntry $CE,12279,SoundTest_DAC_CE
-		SoundTest_DACSampleEntry $CF,7166,SoundTest_DAC_CF
-		SoundTest_DACSampleEntry $D0,12852,SoundTest_DAC_D0
-		SoundTest_DACSampleEntry $D1,10830,SoundTest_DAC_D1
-		SoundTest_DACSampleEntry $D2,10040,SoundTest_DAC_D2
-		SoundTest_DACSampleEntry $D3,9687,SoundTest_DAC_D3
-		SoundTest_DACSampleEntry $D4,12852,SoundTest_DAC_D4
+		SoundTest_DACSampleEntry dacB0.id,12279,SoundTest_DAC_B0
+		SoundTest_DACSampleEntry dacB1.id,12279,SoundTest_DAC_B1
+		SoundTest_DACSampleEntry dacB2.id,13482,SoundTest_DAC_B2
+		SoundTest_DACSampleEntry dacB3.id,13482,SoundTest_DAC_B3
+		SoundTest_DACSampleEntry dacB4.id,7998,SoundTest_DAC_B4
+		SoundTest_DACSampleEntry dacB5.id,7998,SoundTest_DAC_B5
+		SoundTest_DACSampleEntry dacB6.id,12279,SoundTest_DAC_B6
+		SoundTest_DACSampleEntry dacB7.id,14176,SoundTest_DAC_B7
+		SoundTest_DACSampleEntry dacB8.id,7998,SoundTest_DAC_B8
+		SoundTest_DACSampleEntry dacB9.id,7998,SoundTest_DAC_B9
+		SoundTest_DACSampleEntry dacBA.id,12279,SoundTest_DAC_BA
+		SoundTest_DACSampleEntry dacBB.id,13482,SoundTest_DAC_BB
+		SoundTest_DACSampleEntry dacBC.id,11755,SoundTest_DAC_BC
+		SoundTest_DACSampleEntry dacBD.id,16766,SoundTest_DAC_BD
+		SoundTest_DACSampleEntry dacBE.id,10420,SoundTest_DAC_BE
+		SoundTest_DACSampleEntry dacBF.id,7998,SoundTest_DAC_BF
+		SoundTest_DACSampleEntry dacC0.id,14176,SoundTest_DAC_C0
+		SoundTest_DACSampleEntry dacC1.id,9687,SoundTest_DAC_C1
+		SoundTest_DACSampleEntry dacC2.id,7998,SoundTest_DAC_C2
+		SoundTest_DACSampleEntry dacC3.id,8492,SoundTest_DAC_C3
+		SoundTest_DACSampleEntry dacC4.id,6520,SoundTest_DAC_C4
+		SoundTest_DACSampleEntry dacC5.id,12279,SoundTest_DAC_C5
+		SoundTest_DACSampleEntry dacC6.id,12279,SoundTest_DAC_C6
+		SoundTest_DACSampleEntry dacC7.id,12279,SoundTest_DAC_C7
+		SoundTest_DACSampleEntry dacC8.id,7998,SoundTest_DAC_C8
+		SoundTest_DACSampleEntry dacC9.id,12279,SoundTest_DAC_C9
+		SoundTest_DACSampleEntry dacCA.id,7998,SoundTest_DAC_CA
+		SoundTest_DACSampleEntry dacCB.id,7998,SoundTest_DAC_CB
+		SoundTest_DACSampleEntry dacCC.id,7998,SoundTest_DAC_CC
+		SoundTest_DACSampleEntry dacCD.id,12279,SoundTest_DAC_CD
+		SoundTest_DACSampleEntry dacCE.id,12279,SoundTest_DAC_CE
+		SoundTest_DACSampleEntry dacCF.id,7166,SoundTest_DAC_CF
+		SoundTest_DACSampleEntry dacD0.id,12852,SoundTest_DAC_D0
+		SoundTest_DACSampleEntry dacD1.id,10830,SoundTest_DAC_D1
+		SoundTest_DACSampleEntry dacD2.id,10040,SoundTest_DAC_D2
+		SoundTest_DACSampleEntry dacD3.id,9687,SoundTest_DAC_D3
+		SoundTest_DACSampleEntry dacD4.id,12852,SoundTest_DAC_D4
 	endif
 	if SMPS_S3DDACSamples
-		SoundTest_DACSampleEntry $D5,24104,SoundTest_DAC_D5
-		SoundTest_DACSampleEntry $D6,9687,SoundTest_DAC_D6
+		SoundTest_DACSampleEntry dacD5.id,24104,SoundTest_DAC_D5
+		SoundTest_DACSampleEntry dacD6.id,9687,SoundTest_DAC_D6
 	endif
 	if SMPS_S3DACSamples
-		SoundTest_DACSampleEntry $D7,8492,SoundTest_DAC_D7
-		SoundTest_DACSampleEntry $D8,6490,SoundTest_DAC_D8
+		SoundTest_DACSampleEntry dacD7.id,8492,SoundTest_DAC_D7
+		SoundTest_DACSampleEntry dacD8.id,6490,SoundTest_DAC_D8
 	endif
 	if SMPS_SCDACSamples
-		SoundTest_DACSampleEntry $D9,4728,SoundTest_DAC_D9
-		SoundTest_DACSampleEntry $DA,13610,SoundTest_DAC_DA
-		SoundTest_DACSampleEntry $DB,13610,SoundTest_DAC_DB
-		SoundTest_DACSampleEntry $DC,11363,SoundTest_DAC_DC
-		SoundTest_DACSampleEntry $DD,10497,SoundTest_DAC_DD
-		SoundTest_DACSampleEntry $DE,13610,SoundTest_DAC_DE
-		SoundTest_DACSampleEntry $DF,13610,SoundTest_DAC_DF
+		SoundTest_DACSampleEntry dacD9.id,4728,SoundTest_DAC_D9
+		SoundTest_DACSampleEntry dacDA.id,13610,SoundTest_DAC_DA
+		SoundTest_DACSampleEntry dacDB.id,13610,SoundTest_DAC_DB
+		SoundTest_DACSampleEntry dacDC.id,11363,SoundTest_DAC_DC
+		SoundTest_DACSampleEntry dacDD.id,10497,SoundTest_DAC_DD
+		SoundTest_DACSampleEntry dacDE.id,13610,SoundTest_DAC_DE
+		SoundTest_DACSampleEntry dacDF.id,13610,SoundTest_DAC_DF
 	endif
-		SoundTest_DACSampleEntry $E0,16000,SoundTest_DAC_E0
+		SoundTest_DACSampleEntry dacE0.id,16000,SoundTest_DAC_E0
 SoundTest_DACSampleTable_End:
 		even
 
@@ -1072,7 +1076,7 @@ SoundTest_DAC_8B: dc.b "VERY LOW",0
 SoundTest_DAC_83: dc.b "CLAP",0
 SoundTest_DAC_84: dc.b "SCRATCH",0
 SoundTest_DAC_86: dc.b "HI TOM",0
-SoundTest_DAC_87: dc.b "LOW BONGO",0
+SoundTest_DAC_87: dc.b "VLOW BONGO",0
 SoundTest_DAC_8C: dc.b "MID TOM",0
 SoundTest_DAC_8D: dc.b "LOW TOM",0
 SoundTest_DAC_8E: dc.b "FLOOR TOM",0
@@ -1083,7 +1087,7 @@ SoundTest_DAC_92: dc.b "SNARE S3",0
 SoundTest_DAC_93: dc.b "HI TOM S3",0
 SoundTest_DAC_94: dc.b "MID TOM S3",0
 SoundTest_DAC_95: dc.b "LOW TOM S3",0
-SoundTest_DAC_96: dc.b "FLOOR TOM3",0
+SoundTest_DAC_96: dc.b "FLR TOM S3",0
 SoundTest_DAC_97: dc.b "KICK S3",0
 SoundTest_DAC_98: dc.b "MUFF SNARE",0
 SoundTest_DAC_99: dc.b "CRASH CYMB",0
@@ -1102,9 +1106,9 @@ SoundTest_DAC_A5: dc.b "TIGHT SNARE",0
 SoundTest_DAC_A6: dc.b "MID SNARE",0
 SoundTest_DAC_A7: dc.b "LOOSE SNARE",0
 SoundTest_DAC_A8: dc.b "SNARE LOOSE",0
-SoundTest_DAC_A9: dc.b "HI TIMPANI",0
-SoundTest_DAC_AA: dc.b "LOW TIMPANI",0
-SoundTest_DAC_AB: dc.b "MID TIMPANI",0
+SoundTest_DAC_A9: dc.b "HI TIMP S3",0
+SoundTest_DAC_AA: dc.b "LOW TIMP S3",0
+SoundTest_DAC_AB: dc.b "MID TIMP S3",0
 SoundTest_DAC_AC: dc.b "QUICK SNARE",0
 SoundTest_DAC_AD: dc.b "CLICK",0
 SoundTest_DAC_AE: dc.b "POWER KICK",0
@@ -1123,7 +1127,7 @@ SoundTest_DAC_BA: dc.b "WOO",0
 SoundTest_DAC_BB: dc.b "GO",0
 SoundTest_DAC_BC: dc.b "SNARE+GO",0
 SoundTest_DAC_BD: dc.b "POWER TOM",0
-SoundTest_DAC_BE: dc.b "HI WOOD",0
+SoundTest_DAC_BE: dc.b "HI WOOD BLK",0
 SoundTest_DAC_BF: dc.b "LOW WOOD",0
 SoundTest_DAC_C0: dc.b "HI HIT DRUM",0
 SoundTest_DAC_C1: dc.b "LOW HIT",0
@@ -1157,7 +1161,7 @@ SoundTest_DAC_DC: dc.b "MID TIMP",0
 SoundTest_DAC_DD: dc.b "LOW TIMP",0
 SoundTest_DAC_DE: dc.b "LETS GO",0
 SoundTest_DAC_DF: dc.b "HEY",0
-SoundTest_DAC_E0: dc.b "SEGA!",0
+SoundTest_DAC_E0: dc.b "SEGA",0
 SoundTest_DACRateBlank:    dc.b "        ",0
 		even
 
