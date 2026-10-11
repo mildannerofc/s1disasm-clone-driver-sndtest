@@ -1717,7 +1717,7 @@ Sega_WaitPal:		; while light scanning effect is active
 		; while "SEGA" sound is playing
 		move.b	#bgm_Sega,d0				; set "SEGA" sound
 		bsr.w	QueueSound1				; queue it
-		move.b	#id_VBlank_SegaPCM,(v_vblank_routine).w	; set VBlank routine to $14
+		move.b	#id_VBlank_Sega,(v_vblank_routine).w	; set VBlank routine to $14
 		bsr.w	WaitForVBlank				; wait for VBlank to play the sound (CPU is frozen here until sound finished playing)
 ; ---------------------------------------------------------------------------
 
