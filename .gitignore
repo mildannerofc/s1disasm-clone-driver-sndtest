@@ -1,0 +1,26 @@
+desktop.ini
+
+SonED2 Projects/temp.dat
+SonED2 v1.0x Projects/temp.dat
+SonLVL INI Files/dllcache
+SonLVL INI Files/SonLVL.log
+SonPLN.log
+S1SSEdit.undo
+Utility Project Files/SonED2 Projects/temp.dat
+Utility Project Files/SonED2 v1.0x Projects/temp.dat
+Utility Project Files/SonLVL INI Files/dllcache
+Utility Project Files/SonLVL INI Files/SonLVL.log
+Utility Project Files/SonPLN.log
+Utility Project Files/S1SSEdit.undo
+.idea/
+
+# Misc. compiler output.
+sonic.lst
+sonic.log
+errors.txt
+sonic.p
+sonic.h
+
+# Built ROMs.
+s1built.bin
+s1built.prev.bin
