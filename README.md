@@ -4,7 +4,7 @@
 > This repository is a fork of my ASM68K implementation with Mega PCM 2, which this one uses AS and Clone Driver for easier use.
 
 ## Sonic 1 - Simple Plain Text Sound Test
-In this repository, it targets ASM68K and also contain optimized decompressions to load the screen faster.
+In this repository, it targets AS and also contain optimized decompressions to load the screen faster.
 
 This screen is also exclusive to this repository, you might cleanup some stuff if you want to include it in your ROM hack.
 
