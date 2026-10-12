@@ -350,7 +350,7 @@ SoundTest_UpdateChannels:
 		lea	SMPS_RAM.v_music_psg2_track(a6),a0
 		moveq	#22,d0
 		bsr.w	SoundTest_DrawPSGTrack
-		bsr.w	SoundTest_DrawNoise
+		bsr.w	SoundTest_DrawPSG3
 		rts
 
 SoundTest_DrawFMTrack:
@@ -525,7 +525,14 @@ SoundTest_DrawPSGTrack:
 		endif
 		rts
 
-SoundTest_DrawNoise:
+; ---------------------------------------------------------------------------
+; PSG3 mode detection.
+; PSG3 is the physical third PSG channel in both cases:
+;   VoiceControl = $E0 : SN76489 noise mode (display N-0..N-3)
+;   any other active voice : PSG tone mode (display the detected note)
+; The on-screen channel label remains "PSG 3" in either mode.
+; ---------------------------------------------------------------------------
+SoundTest_DrawPSG3:
 		lea	(Clone_Driver_RAM).w,a6
 		lea	SMPS_RAM.v_music_psg3_track(a6),a0
 		moveq	#24,d5
@@ -533,9 +540,26 @@ SoundTest_DrawNoise:
 		beq.w	SoundTest_DrawRestAtRow
 		btst	#1,SMPS_Track.PlaybackControl(a0)
 		bne.w	SoundTest_DrawRestAtRow
-		cmpi.b	#$E0,SMPS_Track.VoiceControl(a0)
-		bne.w	SoundTest_DrawRestAtRow
 
+		; Clear the previous mode's frequency text. The selected mode below
+		; redraws this field with either the tone divider or the noise setting.
+		lea	SoundTest_BlankFreq(pc),a0
+		moveq	#24,d1
+		moveq	#SoundTest_FreqX,d0
+		move.w	#Tile_Pal1|Tile_Prio,d2
+		bsr.w	SoundTest_DrawText
+		lea	(Clone_Driver_RAM).w,a6
+		lea	SMPS_RAM.v_music_psg3_track(a6),a0
+		cmpi.b	#$E0,SMPS_Track.VoiceControl(a0)
+		beq.s	.noise_mode
+
+		; It is an active PSG3 tone, not noise. Reuse the PSG1/PSG2
+		; divider-to-note conversion and frequency display for this channel.
+		moveq	#24,d0
+		bra.w	SoundTest_DrawPSGTrack
+
+.noise_mode:
+		; The PSG3 track is currently configured as SN76489 noise.
 		move.b	SMPS_Track.PSGNoise(a0),d1
 		bsr.w	SoundTest_FormatNoiseNote
 		move.w	d5,d1
@@ -544,6 +568,7 @@ SoundTest_DrawNoise:
 		lea	(v_soundtest_textbuf).w,a0
 		bsr.w	SoundTest_DrawText
 
+		; Display the noise control/rate byte using the existing format.
 		lea	(Clone_Driver_RAM).w,a6
 		lea	SMPS_RAM.v_music_psg3_track(a6),a0
 		moveq	#0,d1
